@@ -41,7 +41,6 @@ const scenarioWalker = createScenarioWalker({
 })
 
 export const handleNlpRequest = async (request: NLPRequest): Promise<NLPResponse> => {
-    console.log(request)
     const req = createSaluteRequest(request)
     const res = createSaluteResponse(request)
 
