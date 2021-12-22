@@ -104,7 +104,7 @@ wss.on('connection', (ws) => {
                 break;
         }
         console.log('queue', queue.map(item => item.name))
-        console.log('playingPairs', playingPairs)
+        console.log('playingPairs', playingPairs.length)
     })
     ws.on('close', () => {
         //@ts-ignore
