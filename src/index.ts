@@ -3,6 +3,7 @@ require('dotenv').config()
 import express from 'express'
 import { Server } from 'ws'
 import { webHookRout } from './routes/webHookRout';
+import { Message, PlayingClient, PlayingPair } from './types';
 
 const PORT = process.env.PORT || 5000;
 // const INDEX = '/index.html';
@@ -23,55 +24,87 @@ const server = app.listen(PORT, () => console.log(`Listening on ${PORT}`))
 
 const wss = new Server({ server });
 
-let queue: string[] = []
+let queue: PlayingClient[] = []
 let clients = {}
 let playingPairs: PlayingPair[] = []
 
 
 export const checkUsers = () => {
-    
+
     wss.clients.forEach(client => {
-        
+
     })
 }
 
 const checkIsUserPlaying = (id: string) => {
     let isAlreadyPlaying = false
     playingPairs.forEach(pair => {
-        if (pair[0] === id || pair[1] === id) isAlreadyPlaying = true
+        if (pair[0].userId === id || pair[1].userId === id) isAlreadyPlaying = true
     })
     return isAlreadyPlaying
 }
 
-const startGame = (id1: string, id2: string) => {
-    wss.clients.forEach(client => {
-        //@ts-ignore
-        if (client.id === id1 || client.id === id2){
-            client.send(JSON.stringify({type: 'start'}))
+const startGame = (player1: PlayingClient, player2: PlayingClient) => {
+    player1.ws.send(JSON.stringify({
+        type: 'START', payload: {
+            opponentName: player2.name, opponentId: player2.userId
         }
-    })
+    }))
+    player2.ws.send(JSON.stringify({
+        type: 'START', payload: {
+            opponentName: player1.name, opponentId: player1.userId
+        }
+    }))
+    // wss.clients.forEach(client => {
+    //     //@ts-ignore
+    //     if (client.id === player1.userId) {
+    //         client.send(JSON.stringify({ type: 'start', opponentName: player2.name }))
+    //     }
+    //     //@ts-ignore
+    //     if (client.id === player2.userId) {
+    //         client.send(JSON.stringify({ type: 'start', opponentName: player1.name }))
+    //     }
+    // })
 }
 
 wss.on('connection', (ws) => {
     console.log('Client connected');
 
-    ws.send('Привет привет пользователь')
-    ws.on('message', (rawMessage, isBinary) => {
-        const message = JSON.parse(rawMessage.toString()) as {type: string, id: string}
-        if (message.type === 'id'){
-            if(!checkIsUserPlaying(message.id)){
-                //@ts-ignore
-                ws.id = id
-                if (queue.length === 0) {
-                    queue.push(message.id)
-                }else {
-                    startGame(queue[0], message.id)
-                    playingPairs.push([queue[0], message.id])
-                    queue.splice(0, 1)
+    ws.on('message', (rawMessage) => {
+        const message = JSON.parse(rawMessage.toString()) as Message
+
+        switch (message.type) {
+            case 'RANDOM':
+                if (!checkIsUserPlaying(message.payload.userId)) {
+                    //@ts-ignore
+                    ws.id = message.payload.userId
+                    if (queue.length === 0) {
+                        queue.push({
+                            userId: message.payload.userId,
+                            name: message.payload.name,
+                            ws: ws,
+                        })
+                    } else {
+                        startGame(queue[0], {
+                            userId: message.payload.userId,
+                            name: message.payload.name,
+                            ws
+                        })
+                        playingPairs.push([{
+                            userId: queue[0].userId, ws: queue[0].ws, name: queue[0].name
+                        }, {
+                            userId: message.payload.userId, ws, name: message.payload.name
+                        }])
+                        queue.splice(0, 1)
+                    }
                 }
-            }
+                break
+            case 'FRIEND':
+                break
+            default:
+                break;
         }
-        console.log('queue', queue)
+        // console.log('queue', queue)
         console.log('playingPairs', playingPairs)
     })
     ws.on('close', () => {
@@ -89,9 +122,3 @@ wss.on('connection', (ws) => {
 //         client.send(new Date().toTimeString());
 //     });
 // }, 1000);
-type PlayingClient = {
-    id: string
-    ws: any
-}
-// type PlayingClient = {[key: string]: WebSocket}
-type PlayingPair = [string, string]
