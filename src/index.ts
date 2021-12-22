@@ -103,7 +103,7 @@ wss.on('connection', (ws) => {
             default:
                 break;
         }
-        // console.log('queue', queue)
+        console.log('queue', queue.map(item => item.name))
         console.log('playingPairs', playingPairs)
     })
     ws.on('close', () => {
