@@ -77,6 +77,7 @@ wss.on('connection', (ws) => {
                 if (!checkIsUserPlaying(message.payload.userId)) {
                     //@ts-ignore
                     ws.id = message.payload.userId
+                    console.log('id:', message.payload.userId)
                     if (queue.length === 0) {
                         queue.push({
                             userId: message.payload.userId,
