@@ -74,6 +74,8 @@ wss.on('connection', (ws) => {
 
         switch (message.type) {
             case 'RANDOM':
+                console.log('queue before', queue.map(item => item.name))
+                queue = queue.filter(id => id.userId !== message.payload.userId)
                 if (!checkIsUserPlaying(message.payload.userId)) {
                     //@ts-ignore
                     ws.id = message.payload.userId
@@ -104,14 +106,14 @@ wss.on('connection', (ws) => {
             default:
                 break;
         }
-        console.log('queue', queue.map(item => item.name))
+        console.log('queue after', queue.map(item => item.name))
         console.log('playingPairs', playingPairs.length)
     })
     ws.on('close', () => {
         //@ts-ignore
         console.log(`Client disconnected id: ${ws.id}`)
         //@ts-ignore
-        queue = queue.filter(id => id !== ws.id)
+        queue = queue.filter(id => id.userId !== ws.id)
     });
 });
 
