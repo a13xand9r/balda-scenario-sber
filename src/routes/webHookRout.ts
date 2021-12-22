@@ -5,6 +5,7 @@ export const webHookRout = Router()
 
 webHookRout.post('/api/hook', async (req, res) => {
     console.log('api/hook POST request')
+    console.log(req.body)
     res.status(200).json(await handleNlpRequest(req.body))
 })
 

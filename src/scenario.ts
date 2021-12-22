@@ -22,6 +22,10 @@ const intents = createIntents(model.intents)
 const { intent, match } = createMatchers<ScenarioRequest, typeof intents>()
 
 const userScenario = createUserScenario<ScenarioRequest>({
+    Test: {
+        match: () => false,
+        handle: () => {}
+    }
 })
 
 const systemScenario = createSystemScenario({
@@ -37,10 +41,11 @@ const scenarioWalker = createScenarioWalker({
 })
 
 export const handleNlpRequest = async (request: NLPRequest): Promise<NLPResponse> => {
+    console.log(request)
     const req = createSaluteRequest(request)
     const res = createSaluteResponse(request)
 
-    const sessionId = request.uuid.sub
+    const sessionId = request.uuid.userId
     const session = await storage.resolve(sessionId)
 
     await scenarioWalker({ req, res, session })

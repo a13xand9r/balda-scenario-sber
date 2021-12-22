@@ -5,14 +5,13 @@ import { Server } from 'ws'
 import { webHookRout } from './routes/webHookRout';
 import { Message, PlayingClient, PlayingPair } from './types';
 
-const PORT = process.env.PORT || 5000;
-// const INDEX = '/index.html';
+const PORT = process.env.PORT || 5000
 
 const app = express()
 
-app.use(webHookRout)
 app.use(express.json())
 app.use(cors())
+app.use(webHookRout)
 export let requestCount = 0
 
 app.get('/', (_, res) => {
