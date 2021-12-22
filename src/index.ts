@@ -67,7 +67,7 @@ const startGame = (player1: PlayingClient, player2: PlayingClient) => {
 }
 
 wss.on('connection', (ws) => {
-    console.log('Client connected');
+    console.log('Client connected...');
 
     ws.on('message', (rawMessage) => {
         const message = JSON.parse(rawMessage.toString()) as Message
@@ -113,7 +113,7 @@ wss.on('connection', (ws) => {
     })
     ws.on('close', () => {
         //@ts-ignore
-        console.log(`Client disconnected id: ${ws.id}`)
+        console.log(`Client disconnected, id: ${ws.id}`)
         //@ts-ignore
         queue = queue.filter(id => id.userId !== ws.id)
         console.log('queue', queue)
