@@ -79,6 +79,8 @@ wss.on('connection', (ws) => {
                 if (!checkIsUserPlaying(message.payload.userId)) {
                     //@ts-ignore
                     ws.id = message.payload.userId
+                    //@ts-ignore
+                    console.log('ws.id', ws.id)
                     console.log('id:', message.payload.userId)
                     if (queue.length === 0) {
                         queue.push({
@@ -114,6 +116,7 @@ wss.on('connection', (ws) => {
         console.log(`Client disconnected id: ${ws.id}`)
         //@ts-ignore
         queue = queue.filter(id => id.userId !== ws.id)
+        console.log('queue', queue)
     });
 });
 
