@@ -76,12 +76,11 @@ wss.on('connection', (ws) => {
             case 'RANDOM':
                 console.log('queue before', queue.map(item => item.name))
                 queue = queue.filter(id => id.userId !== message.payload.userId)
+                //@ts-ignore
+                ws.id = message.payload.userId
+                //@ts-ignore
+                console.log('ws.id', ws.id)
                 if (!checkIsUserPlaying(message.payload.userId)) {
-                    //@ts-ignore
-                    ws.id = message.payload.userId
-                    //@ts-ignore
-                    console.log('ws.id', ws.id)
-                    console.log('id:', message.payload.userId)
                     if (queue.length === 0) {
                         queue.push({
                             userId: message.payload.userId,
