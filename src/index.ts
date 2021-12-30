@@ -53,7 +53,10 @@ const sendMessageForPair = (playingPair: PlayingPair, message1: SendMessage, mes
 const sendMessageForClient = (userId: string, message: SendMessage) => {
     wss.clients.forEach(client => {
         //@ts-ignore
+        console.log(`${message.type} client.id`,client.id)
+        //@ts-ignore
         if (client.id === userId){
+            console.log(`send ${message.type} for userId`,userId)
             client.send(JSON.stringify(message))
         }
     })
@@ -185,7 +188,7 @@ wss.on('connection', (ws) => {
                 })
                 //@ts-ignore
                 const playingPairReady = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
-                console.log(playingPairReady?.map(client => ({name: client.name, isReady: client.isReady})))
+                // console.log(playingPairReady?.map(client => ({name: client.name, isReady: client.isReady})))
                 if (playingPairReady){
                     setCurrentPlayer(playingPairReady)
                 }
@@ -228,7 +231,7 @@ wss.on('connection', (ws) => {
             default:
                 break;
         }
-        console.log('queue after', queue.map(item => item.name))
+        // console.log('queue after', queue.map(item => item.name))
         // console.log('playingPairs', playingPairs.length)
     })
     ws.on('close', () => {
@@ -236,7 +239,7 @@ wss.on('connection', (ws) => {
         console.log(`Client disconnected, id: ${ws.id}`)
         //@ts-ignore
         queue = queue.filter(id => id.userId !== ws.id)
-        console.log('queue', queue)
+        // console.log('queue', queue)
     });
 });
 
