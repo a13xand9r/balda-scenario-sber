@@ -4,8 +4,9 @@ import express from 'express'
 import { Server } from 'ws'
 import { webHookRout } from './routes/webHookRout';
 import { getWord, wordsRoute } from './routes/wordsRoute';
-import { GetMessage, PlayingClient, PlayingPair, SendMessage } from './types';
+import { CellType, GetMessage, PlayingClient, PlayingPair, SendMessage } from './types';
 import { v4 } from 'uuid'
+import { getRandomFromArray } from './utils/utils';
 
 const PORT = process.env.PORT || 5000
 
@@ -49,6 +50,14 @@ const sendMessageForPair = (playingPair: PlayingPair, message1: SendMessage, mes
         }
     })
 }
+const sendMessageForClient = (userId: string, message: SendMessage) => {
+    wss.clients.forEach(client => {
+        //@ts-ignore
+        if (client.id === userId){
+            client.send(JSON.stringify(message))
+        }
+    })
+}
 const checkIsUserPlaying = (id: string) => {
     let isAlreadyPlaying = false
     playingPairs.forEach(pair => {
@@ -71,16 +80,6 @@ const pairDone = (playingPair: PlayingPair) => {
             }
         }
     )
-    // player1.ws.send(JSON.stringify({
-    //     type: 'FOUND', payload: {
-    //         opponentName: player2.name, opponentId: player2.userId
-    //     }
-    // } as SendMessage))
-    // player2.ws.send(JSON.stringify({
-    //     type: 'FOUND', payload: {
-    //         opponentName: player1.name, opponentId: player1.userId
-    //     }
-    // } as SendMessage))
 }
 const sendStartWord = async (playingPair: PlayingPair, lettersCount: number = 5) => {
     const startWord = await getWord(lettersCount)
@@ -88,6 +87,16 @@ const sendStartWord = async (playingPair: PlayingPair, lettersCount: number = 5)
         type: 'START_WORD',
         payload: {
             startWord
+        }
+    })
+}
+const sendNewCells = (userId: string, cells: CellType[], newWord: string) => {
+    sendMessageForClient(userId, {
+        type: 'WORD_DONE',
+        payload: {
+            cells,
+            opponentId: '',
+            newWord
         }
     })
 }
@@ -105,6 +114,24 @@ const changePlaygroundSize = (playingPair: PlayingPair, size: number) => {
             opponentId: ''
         }
     })
+}
+const setCurrentPlayer = (playingPair: PlayingPair) => {
+    const currentPlayer = getRandomFromArray([1, 2]) as 1 | 2
+    sendMessageForPair(playingPair, {
+        type: 'SET_CURRENT_PLAYER',
+        payload: {
+            currentPlayer: currentPlayer,
+            opponentId: ''
+        }
+    },
+    {
+        type: 'SET_CURRENT_PLAYER',
+        payload: {
+            currentPlayer: currentPlayer === 1 ? 2 : 1,
+            opponentId: ''
+        }
+    }
+    )
 }
 
 wss.on('connection', (ws) => {
@@ -159,16 +186,41 @@ wss.on('connection', (ws) => {
                 //@ts-ignore
                 const playingPairReady = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
                 console.log(playingPairReady?.map(client => ({name: client.name, isReady: client.isReady})))
+                if (playingPairReady){
+                    setCurrentPlayer(playingPairReady)
+                }
                 if (playingPairReady && playingPairReady[0].isReady && playingPairReady[1].isReady) {
                     startGame(playingPairReady)
                 }
                 break
             case 'CHANGE_PLAYGROUND_SIZE':
+                playingPairs = playingPairs.map(pair => {
+                    //@ts-ignore
+                    if (pair[0].userId === ws.id || pair[1].userId === ws.id){
+                        return [{...pair[0], isReady: false}, {...pair[1], isReady: false}]
+                    }
+                    return pair
+                })
                 //@ts-ignore
                 const playingPairPlayGround = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
                 if (playingPairPlayGround){
                     changePlaygroundSize(playingPairPlayGround, message.payload.size)
                     sendStartWord(playingPairPlayGround, message.payload.size)
+                }
+                break
+            case 'WORD_DONE':
+                // //@ts-ignore
+                // const playingPairNewCells = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
+                // if (playingPairNewCells){
+                //     sendNewCells(playingPairNewCells, message.payload.cells)
+                // }
+                sendNewCells(message.payload.opponentId, message.payload.cells, message.payload.newWord)
+                break
+            case 'SET_CURRENT_PLAYER':
+                //@ts-ignore
+                const playingPairCurrentPlayer = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
+                if (playingPairCurrentPlayer){
+                    setCurrentPlayer(playingPairCurrentPlayer)
                 }
                 break
             case 'FRIEND':

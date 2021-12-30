@@ -72,18 +72,37 @@ export type StartWordMessage = {
         startWord: string
     }
 }
+export type WordDoneMessage = {
+    type: 'WORD_DONE'
+    payload: {
+        opponentId: string
+        cells: CellType[]
+        newWord: string
+    }
+}
+export type ChangeCurrentPlayerMessage = {
+    type: 'SET_CURRENT_PLAYER'
+    payload: {
+        opponentId: string
+        currentPlayer: 1 | 2
+    }
+}
 
 export type GetMessage =
     RandomPlayMessage |
     FriendPlayMessage |
     ChangePlaygroundSizeMessage |
-    ReadyMessage
+    ReadyMessage |
+    WordDoneMessage |
+    ChangeCurrentPlayerMessage
 
 export type SendMessage =
     OpponentFoundMessage |
     StartGameMessage |
     ChangePlaygroundSizeMessage |
-    StartWordMessage
+    StartWordMessage |
+    WordDoneMessage |
+    ChangeCurrentPlayerMessage
 
 export type PlayingClient = {
     userId: string
@@ -92,3 +111,11 @@ export type PlayingClient = {
     isReady: boolean
 }
 export type PlayingPair = [PlayingClient, PlayingClient]
+
+export type CellType = {
+    colored: boolean
+    letter: string | null
+    isAvailableToPutLetter: boolean
+    isInput: boolean
+    tempLetter: string | null
+}
