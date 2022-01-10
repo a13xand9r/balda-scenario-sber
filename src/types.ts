@@ -87,6 +87,13 @@ export type ChangeCurrentPlayerMessage = {
         currentPlayer: 1 | 2
     }
 }
+export type FinishGameMessage = {
+    type: 'FINISH_GAME'
+}
+export type OpponentDisconnectedMessage = {
+    type: 'OPPONENT_DISCONNECTED'
+}
+
 
 export type GetMessage =
     RandomPlayMessage |
@@ -94,7 +101,8 @@ export type GetMessage =
     ChangePlaygroundSizeMessage |
     ReadyMessage |
     WordDoneMessage |
-    ChangeCurrentPlayerMessage
+    ChangeCurrentPlayerMessage |
+    FinishGameMessage
 
 export type SendMessage =
     OpponentFoundMessage |
@@ -102,11 +110,12 @@ export type SendMessage =
     ChangePlaygroundSizeMessage |
     StartWordMessage |
     WordDoneMessage |
-    ChangeCurrentPlayerMessage
+    ChangeCurrentPlayerMessage |
+    OpponentDisconnectedMessage
 
 export type PlayingClient = {
     userId: string
-    ws: WebSocket
+    // ws: WebSocket
     name: string
     isReady: boolean
 }
@@ -118,4 +127,12 @@ export type CellType = {
     isAvailableToPutLetter: boolean
     isInput: boolean
     tempLetter: string | null
+}
+
+export interface ExtWebSocket extends WebSocket {
+    id?: string
+}
+
+export type DisconnectTimers = {
+    [key: string]: ReturnType<typeof setTimeout>
 }

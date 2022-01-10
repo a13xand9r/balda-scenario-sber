@@ -4,9 +4,9 @@ import express from 'express'
 import { Server } from 'ws'
 import { webHookRout } from './routes/webHookRout';
 import { getWord, wordsRoute } from './routes/wordsRoute';
-import { CellType, GetMessage, PlayingClient, PlayingPair, SendMessage } from './types';
+import { CellType, DisconnectTimers, ExtWebSocket, GetMessage, PlayingClient, PlayingPair, SendMessage } from './types';
 import { v4 } from 'uuid'
-import { getRandomFromArray } from './utils/utils';
+import { getRandomFromArray } from './utils/utils'
 
 const PORT = process.env.PORT || 5000
 
@@ -30,32 +30,22 @@ const wss = new Server({ server });
 let queue: PlayingClient[] = []
 let clients = {}
 let playingPairs: PlayingPair[] = []
+let disconnectTimers: DisconnectTimers = {}
 
-
-export const checkUsers = () => {
-
-    wss.clients.forEach(client => {
-
-    })
-}
 const sendMessageForPair = (playingPair: PlayingPair, message1: SendMessage, message2?: SendMessage) => {
     wss.clients.forEach(client => {
-        //@ts-ignore
-        if (client.id === playingPair[0].userId){
+        if ((client as any).id === playingPair[0].userId){
             client.send(JSON.stringify(message1))
         }
-        //@ts-ignore
-        if (client.id === playingPair[1].userId){
+        if ((client as any).id === playingPair[1].userId){
             client.send(JSON.stringify(message2 ?? message1))
         }
     })
 }
 const sendMessageForClient = (userId: string, message: SendMessage) => {
     wss.clients.forEach(client => {
-        //@ts-ignore
-        console.log(`${message.type} client.id`,client.id)
-        //@ts-ignore
-        if (client.id === userId){
+        console.log(`${message.type} client.id`,(client as any).id)
+        if ((client as any).id === userId){
             console.log(`send ${message.type} for userId`,userId)
             client.send(JSON.stringify(message))
         }
@@ -137,35 +127,36 @@ const setCurrentPlayer = (playingPair: PlayingPair) => {
     )
 }
 
-wss.on('connection', (ws) => {
-    console.log('Client connected...');
+const finishGame = (playingPair: PlayingPair) => {
+    sendMessageForPair(playingPair, {
+        type: 'OPPONENT_DISCONNECTED'
+    })
+}
+
+wss.on('connection', (ws: ExtWebSocket) => {
+    console.log('Client connected...')
 
     ws.on('message', (rawMessage) => {
         const message = JSON.parse(rawMessage.toString()) as GetMessage
-
-        // //@ts-ignore
-        // const playingPair = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
         switch (message.type) {
             case 'RANDOM':
-                console.log('queue before', queue.map(item => item.name))
+                // console.log('queue before', queue.map(item => item.name))
                 queue = queue.filter(id => id.userId !== message.payload.userId)
-                //@ts-ignore
                 ws.id = message.payload.userId
-                //@ts-ignore
                 console.log('ws.id', ws.id)
+                if (disconnectTimers[ws.id]) clearTimeout(disconnectTimers[ws.id])
                 if (!checkIsUserPlaying(message.payload.userId)) {
                     if (queue.length === 0) {
                         queue.push({
                             userId: message.payload.userId,
                             name: message.payload.name,
-                            ws: ws,
                             isReady: false
                         })
                     } else {
                         const newPair: PlayingPair = [{
-                            userId: queue[0].userId, ws: queue[0].ws, name: queue[0].name, isReady: false
+                            userId: queue[0].userId, name: queue[0].name, isReady: false
                         }, {
-                            userId: message.payload.userId, ws, name: message.payload.name, isReady: false
+                            userId: message.payload.userId, name: message.payload.name, isReady: false
                         }]
                         pairDone(newPair)
                         sendStartWord(newPair)
@@ -176,17 +167,14 @@ wss.on('connection', (ws) => {
                 break
             case 'READY':
                 playingPairs = playingPairs.map(pair => {
-                    //@ts-ignore
                     if (pair[0].userId === ws.id){
                         return [{...pair[0], isReady: true}, pair[1]]
                     }
-                    //@ts-ignore
                     if (pair[1].userId === ws.id){
                         return [{...pair[1], isReady: true}, pair[0]]
                     }
                     return pair
                 })
-                //@ts-ignore
                 const playingPairReady = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
                 // console.log(playingPairReady?.map(client => ({name: client.name, isReady: client.isReady})))
                 if (playingPairReady){
@@ -198,13 +186,11 @@ wss.on('connection', (ws) => {
                 break
             case 'CHANGE_PLAYGROUND_SIZE':
                 playingPairs = playingPairs.map(pair => {
-                    //@ts-ignore
                     if (pair[0].userId === ws.id || pair[1].userId === ws.id){
                         return [{...pair[0], isReady: false}, {...pair[1], isReady: false}]
                     }
                     return pair
                 })
-                //@ts-ignore
                 const playingPairPlayGround = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
                 if (playingPairPlayGround){
                     changePlaygroundSize(playingPairPlayGround, message.payload.size)
@@ -212,19 +198,16 @@ wss.on('connection', (ws) => {
                 }
                 break
             case 'WORD_DONE':
-                // //@ts-ignore
-                // const playingPairNewCells = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
-                // if (playingPairNewCells){
-                //     sendNewCells(playingPairNewCells, message.payload.cells)
-                // }
                 sendNewCells(message.payload.opponentId, message.payload.cells, message.payload.newWord)
                 break
             case 'SET_CURRENT_PLAYER':
-                //@ts-ignore
                 const playingPairCurrentPlayer = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
                 if (playingPairCurrentPlayer){
                     setCurrentPlayer(playingPairCurrentPlayer)
                 }
+                break
+            case 'FINISH_GAME':
+                playingPairs = playingPairs.filter(pair => !(pair[0].userId === ws.id || pair[1].userId === ws.id))
                 break
             case 'FRIEND':
                 break
@@ -235,14 +218,18 @@ wss.on('connection', (ws) => {
         // console.log('playingPairs', playingPairs.length)
     })
     ws.on('close', () => {
-        //@ts-ignore
         console.log(`Client disconnected, id: ${ws.id}`)
-        //@ts-ignore
         queue = queue.filter(id => id.userId !== ws.id)
+        const finishGamePair = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
+        if (finishGamePair){
+            disconnectTimers[ws.id as string] = setTimeout(() => {
+                finishGame(finishGamePair)
+                playingPairs = playingPairs.filter(pair => !(pair[0].userId === ws.id || pair[1].userId === ws.id))
+            }, 5000)
+        }
         // console.log('queue', queue)
     });
 });
-
 
 
 // setInterval(() => {
