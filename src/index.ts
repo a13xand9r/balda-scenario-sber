@@ -132,6 +132,11 @@ const finishGame = (playingPair: PlayingPair) => {
         type: 'OPPONENT_DISCONNECTED'
     })
 }
+const timerDone = (playingPair: PlayingPair) => {
+    sendMessageForPair(playingPair, {
+        type: 'TIMER_DONE'
+    })
+}
 
 wss.on('connection', (ws: ExtWebSocket) => {
     console.log('Client connected...')
@@ -199,6 +204,12 @@ wss.on('connection', (ws: ExtWebSocket) => {
                 break
             case 'WORD_DONE':
                 sendNewCells(message.payload.opponentId, message.payload.cells, message.payload.newWord)
+                break
+            case 'TIMER_DONE':
+                const playingPairTimerDone = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
+                if (playingPairTimerDone){
+                    timerDone(playingPairTimerDone)
+                }
                 break
             case 'SET_CURRENT_PLAYER':
                 const playingPairCurrentPlayer = playingPairs.find(pair => pair[0].userId === ws.id || pair[1].userId === ws.id)
