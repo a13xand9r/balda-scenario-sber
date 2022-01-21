@@ -156,6 +156,11 @@ export type DisconnectTimers = {
     [key: string]: ReturnType<typeof setTimeout>
 }
 
+export type LostMessage = {
+    userId: string
+    message: SendMessage
+}
+
 export type ActionType =
     {
         type: 'SET_FIRST_NAME'

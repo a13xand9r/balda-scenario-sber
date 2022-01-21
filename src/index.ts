@@ -4,7 +4,7 @@ import express from 'express'
 import { Server } from 'ws'
 import { webHookRout } from './routes/webHookRout';
 import { getWord, wordsRoute } from './routes/wordsRoute';
-import { CellType, DisconnectTimers, ExtWebSocket, GetMessage, PlayingClient, PlayingPair, SendMessage } from './types';
+import { CellType, DisconnectTimers, ExtWebSocket, GetMessage, LostMessage, PlayingClient, PlayingPair, SendMessage } from './types';
 import { v4 } from 'uuid'
 import { getRandomFromArray } from './utils/utils'
 
@@ -32,24 +32,52 @@ let clients = {}
 let playingPairs: PlayingPair[] = []
 let disconnectTimers: DisconnectTimers = {}
 
+let lostMessages = [] as LostMessage[]
+
 const sendMessageForPair = (playingPair: PlayingPair, message1: SendMessage, message2?: SendMessage) => {
+    let sendClientsId = [] as string[]
     wss.clients.forEach(client => {
         if ((client as any).id === playingPair[0].userId){
             client.send(JSON.stringify(message1))
+            sendClientsId.push(playingPair[0].userId)
         }
         if ((client as any).id === playingPair[1].userId){
             client.send(JSON.stringify(message2 ?? message1))
+            sendClientsId.push(playingPair[1].userId)
         }
     })
+    if (sendClientsId.length === 1){
+        if (sendClientsId[0] === playingPair[0].userId){
+            lostMessages.push({
+                userId: playingPair[1].userId,
+                message: message2 ?? message1
+            })
+        }
+        if (sendClientsId[0] === playingPair[1].userId){
+            lostMessages.push({
+                userId: playingPair[0].userId,
+                message: message1
+            })
+        }
+    }
 }
 const sendMessageForClient = (userId: string, message: SendMessage) => {
+    let sendClientsId = [] as string[]
     wss.clients.forEach(client => {
         console.log(`${message.type} client.id`,(client as any).id)
         if ((client as any).id === userId){
             console.log(`send ${message.type} for userId`,userId)
             client.send(JSON.stringify(message))
+            sendClientsId.push(userId)
         }
     })
+    if (sendClientsId.length === 0) {
+        lostMessages.push({
+            userId: userId,
+            message: message
+        })
+
+    }
 }
 const checkIsUserPlaying = (id: string) => {
     let isAlreadyPlaying = false
@@ -58,6 +86,7 @@ const checkIsUserPlaying = (id: string) => {
     })
     return isAlreadyPlaying
 }
+const checkIsUserLostMessage = (id: string) => lostMessages.find(item => item.userId === id)
 
 const pairDone = (playingPair: PlayingPair) => {
     sendMessageForPair(
@@ -167,6 +196,12 @@ wss.on('connection', (ws: ExtWebSocket) => {
                         sendStartWord(newPair)
                         playingPairs.push(newPair)
                         queue.splice(0, 1)
+                    }
+                } else {
+                    const lostMessage = checkIsUserLostMessage(message.payload.userId)
+                    if (lostMessage){
+                        sendMessageForClient(lostMessage.userId, lostMessage.message)
+                        lostMessages = lostMessages.filter(item => item.userId !== lostMessage.userId)
                     }
                 }
                 break
