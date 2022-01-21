@@ -200,6 +200,7 @@ wss.on('connection', (ws: ExtWebSocket) => {
                 } else {
                     const lostMessage = checkIsUserLostMessage(message.payload.userId)
                     if (lostMessage){
+                        console.log('lost message')
                         sendMessageForClient(lostMessage.userId, lostMessage.message)
                         lostMessages = lostMessages.filter(item => item.userId !== lostMessage.userId)
                     }
