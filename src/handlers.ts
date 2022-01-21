@@ -2,7 +2,6 @@ import { ScenarioHandler, ActionType } from './types';
 import * as dictionary from './system.i18n'
 require('dotenv').config()
 
-
 export const runAppHandler: ScenarioHandler = ({ req, res }) => {
     const keyset = req.i18n(dictionary)
     const responseText = keyset('Привет')
