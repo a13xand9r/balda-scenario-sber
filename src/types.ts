@@ -8,7 +8,22 @@ import WebSocket from 'ws'
 
 
 export interface ScenarioAppState extends AppState {
-
+    name?: string
+    userId?: string
+    startWord?: string
+    player1?: {
+        name: string,
+        words: string[],
+        score: number
+    }
+    player2?: {
+        name: string,
+        words: string[],
+        score: number
+    }
+    currentPlayerNumber?: 1 | 2
+    isMultiplayer?: boolean
+    isOpponentOnline?: null | boolean
 }
 
 export interface ScenarioIntentsVariables extends SaluteRequestVariable {
@@ -140,3 +155,53 @@ export interface ExtWebSocket extends WebSocket {
 export type DisconnectTimers = {
     [key: string]: ReturnType<typeof setTimeout>
 }
+
+export type ActionType =
+    {
+        type: 'SET_FIRST_NAME'
+        payload: {
+            name: string
+        }
+    } |
+    {
+        type: 'SET_SECOND_NAME'
+        payload: {
+            name: string
+        }
+    } |
+    {
+        type: 'SET_PLAYGROUND_SIZE'
+        payload: {
+            size: number
+        }
+    } |
+    {
+        type: 'READY'
+    } |
+    {
+        type: 'UNDERSTAND'
+    } |
+    {
+        type: 'RESET_WORD'
+    } |
+    {
+        type: 'WORD_DONE'
+    } |
+    {
+        type: 'NAVIGATION_NEXT'
+    } |
+    {
+        type: 'NAVIGATION_RULES'
+    } |
+    {
+        type: 'NAVIGATION_PLAY'
+    } |
+    {
+        type: 'NAVIGATION_PLAY_ONLINE'
+    } |
+    {
+        type: 'NAVIGATION_GO_MAIN'
+    } |
+    {
+        type: 'NAVIGATION_BACK'
+    }

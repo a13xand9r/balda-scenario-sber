@@ -13,7 +13,7 @@ import {
     SaluteRequest
 } from '@salutejs/scenario'
 import { SaluteMemoryStorage } from '@salutejs/storage-adapter-memory'
-import { noMatchHandler, runAppHandler } from './handlers'
+import { noMatchHandler, navigationPlayOnlineHandler, navigationPlayOfflineHandler, navigationRulesHandler, runAppHandler, navigationBackHandler, navigationNextHandler, understandHandler, wordDoneHandler, resetWordHandler, readyHandler, currentScoreHandler } from './handlers'
 import model from './intents.json'
 require('dotenv').config()
 
@@ -22,10 +22,50 @@ const intents = createIntents(model.intents)
 const { intent, match } = createMatchers<ScenarioRequest, typeof intents>()
 
 const userScenario = createUserScenario<ScenarioRequest>({
-    Test: {
-        match: () => false,
-        handle: () => {}
-    }
+    NavigationPlayOffline: {
+        match: intent('/Играть вдвоем', {confidence: 0.7}),
+        handle: navigationPlayOfflineHandler
+    },
+    NavigationPlayOnline: {
+        match: intent('/Играть онлайн', {confidence: 0.7}),
+        handle: navigationPlayOnlineHandler
+    },
+    NavigationRules: {
+        match: intent('/Правила', {confidence: 0.7}),
+        handle: navigationRulesHandler
+    },
+    NavigationMain: {
+        match: intent('/На главную', {confidence: 0.7}),
+        handle: navigationRulesHandler
+    },
+    NavigationBack: {
+        match: intent('/Назад', {confidence: 0.7}),
+        handle: navigationBackHandler
+    },
+    NavigationNext: {
+        match: intent('/Далее', {confidence: 0.7}),
+        handle: navigationNextHandler
+    },
+    Understand: {
+        match: intent('/Понятно', {confidence: 0.7}),
+        handle: understandHandler
+    },
+    WordDone: {
+        match: intent('/Засчитать слово', {confidence: 0.7}),
+        handle: wordDoneHandler
+    },
+    ResetWord: {
+        match: intent('/Сбросить слово', {confidence: 0.7}),
+        handle: resetWordHandler
+    },
+    Ready: {
+        match: intent('/Готов', {confidence: 0.7}),
+        handle: readyHandler
+    },
+    // CurrentScore: {
+    //     match: intent('/Текущий счет', {confidence: 0.7}),
+    //     handle: currentScoreHandler
+    // },
 })
 
 const systemScenario = createSystemScenario({
@@ -34,8 +74,8 @@ const systemScenario = createSystemScenario({
 })
 
 const scenarioWalker = createScenarioWalker({
-    // recognizer: new SmartAppBrainRecognizer(process.env.SMARTAPP_BRAIN_TOKEN),
-    // intents,
+    recognizer: new SmartAppBrainRecognizer(process.env.SMARTAPP_BRAIN_TOKEN),
+    intents,
     systemScenario,
     userScenario
 })

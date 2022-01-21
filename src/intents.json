@@ -1,65 +1,164 @@
 {
   "intents": {
-    "/Да": {
+    "/Готов": {
       "matchers": [
         {
           "type": "phrase",
-          "rule": "Да"
-        },
-        {
-          "type": "phrase",
-          "rule": "верно"
-        },
-        {
-          "type": "phrase",
-          "rule": "правильно"
+          "rule": "готов"
         }
       ],
       "variables": {}
     },
-    "/Нет": {
+    "/Играть вдвоем": {
       "matchers": [
         {
           "type": "phrase",
-          "rule": "нет"
+          "rule": "играть"
         },
         {
           "type": "phrase",
-          "rule": "неверно"
-        },
-        {
-          "type": "phrase",
-          "rule": "неправильно"
+          "rule": "играть вдвоем"
         }
       ],
       "variables": {}
     },
-    "/Позвони": {
+    "/Играть онлайн": {
       "matchers": [
         {
           "type": "phrase",
-          "rule": "позвони еще раз"
+          "rule": "играть онлайн"
+        },
+        {
+          "type": "phrase",
+          "rule": "поиск случайного соперника"
+        },
+        {
+          "type": "phrase",
+          "rule": "случайный соперник"
         }
       ],
       "variables": {}
     },
-    "/Другой номер": {
+    "/Правила": {
       "matchers": [
         {
           "type": "phrase",
-          "rule": "другой номер"
+          "rule": "правила"
+        }
+      ],
+      "variables": {}
+    },
+    "/На главную": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "на главную"
+        }
+      ],
+      "variables": {}
+    },
+    "/Назад": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "назад"
         },
         {
           "type": "phrase",
-          "rule": "другой телефон"
+          "rule": "вернись"
+        }
+      ],
+      "variables": {}
+    },
+    "/Понятно": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "понятно"
+        }
+      ],
+      "variables": {}
+    },
+    "/Далее": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "далее"
         },
         {
           "type": "phrase",
-          "rule": "поменяй телефон"
+          "rule": "дальше"
+        }
+      ],
+      "variables": {}
+    },
+    "/Засчитать слово": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "засчитать слово"
         },
         {
           "type": "phrase",
-          "rule": "поменяй номер"
+          "rule": "готово"
+        },
+        {
+          "type": "phrase",
+          "rule": "сделано"
+        },
+        {
+          "type": "phrase",
+          "rule": "заполнил"
+        },
+        {
+          "type": "phrase",
+          "rule": "сходить"
+        },
+        {
+          "type": "phrase",
+          "rule": "засчитать"
+        }
+      ],
+      "variables": {}
+    },
+    "/Сбросить слово": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "сбросить"
+        },
+        {
+          "type": "phrase",
+          "rule": "сбросить слово"
+        },
+        {
+          "type": "phrase",
+          "rule": "отмена"
+        },
+        {
+          "type": "phrase",
+          "rule": "убери слово"
+        },
+        {
+          "type": "phrase",
+          "rule": "убери"
+        }
+      ],
+      "variables": {}
+    },
+    "/Текущий счет": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "Текущий счет"
+        },
+        {
+          "type": "phrase",
+          "rule": "счет"
+        },
+        {
+          "type": "phrase",
+          "rule": "кто выигрывает"
         }
       ],
       "variables": {}
