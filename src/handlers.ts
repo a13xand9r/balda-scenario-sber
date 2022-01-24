@@ -17,6 +17,15 @@ export const noMatchHandler: ScenarioHandler = async ({ req, res }) => {
     res.setPronounceText(responseText)
 }
 
+export const startAppHandler: ScenarioHandler = async ({ req, res }) => {
+    if (req.request.uuid.sub){
+        res.appendCommand({
+            type: 'SET_USER_ID',
+            userId: req.request.uuid.sub
+        })
+    }
+}
+
 export const navigationPlayOfflineHandler: ScenarioHandler = async ({ res }) => {
     console.log('PLAY')
     res.appendCommand<ActionType>({

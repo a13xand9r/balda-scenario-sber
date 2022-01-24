@@ -9,19 +9,22 @@ import {
     createSystemScenario,
     createUserScenario,
     NLPRequest,
-    NLPResponse,
-    SaluteRequest
+    NLPResponse
 } from '@salutejs/scenario'
 import { SaluteMemoryStorage } from '@salutejs/storage-adapter-memory'
-import { noMatchHandler, navigationPlayOnlineHandler, navigationPlayOfflineHandler, navigationRulesHandler, runAppHandler, navigationBackHandler, navigationNextHandler, understandHandler, wordDoneHandler, resetWordHandler, readyHandler, currentScoreHandler, playgroundSizeHandler, setName1Handler, setName2Handler } from './handlers'
+import { noMatchHandler, navigationPlayOnlineHandler, navigationPlayOfflineHandler, navigationRulesHandler, runAppHandler, navigationBackHandler, navigationNextHandler, understandHandler, wordDoneHandler, resetWordHandler, readyHandler, currentScoreHandler, playgroundSizeHandler, setName1Handler, setName2Handler, startAppHandler } from './handlers'
 import model from './intents.json'
 require('dotenv').config()
 
 const storage = new SaluteMemoryStorage()
 const intents = createIntents(model.intents)
-const { intent, text } = createMatchers<ScenarioRequest, typeof intents>()
+const { intent, action } = createMatchers<ScenarioRequest, typeof intents>()
 
 const userScenario = createUserScenario<ScenarioRequest>({
+    StartApp: {
+        match: action('START_APP'),
+        handle: startAppHandler
+    },
     NavigationPlayOffline: {
         match: intent('/Играть вдвоем', {confidence: 0.7}),
         handle: navigationPlayOfflineHandler
