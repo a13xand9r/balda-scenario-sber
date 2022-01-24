@@ -46,7 +46,7 @@ const sendMessageForPair = (playingPair: PlayingPair, message1: SendMessage, mes
             sendClientsId.push(playingPair[1].userId)
         }
     })
-    if (sendClientsId.length === 1){
+    if (sendClientsId.length === 1 && message1.type !== 'OPPONENT_DISCONNECTED'){
         if (sendClientsId[0] === playingPair[0].userId){
             lostMessages.push({
                 userId: playingPair[1].userId,
