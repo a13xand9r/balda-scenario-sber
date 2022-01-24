@@ -13,13 +13,13 @@ import {
     SaluteRequest
 } from '@salutejs/scenario'
 import { SaluteMemoryStorage } from '@salutejs/storage-adapter-memory'
-import { noMatchHandler, navigationPlayOnlineHandler, navigationPlayOfflineHandler, navigationRulesHandler, runAppHandler, navigationBackHandler, navigationNextHandler, understandHandler, wordDoneHandler, resetWordHandler, readyHandler, currentScoreHandler, playgroundSizeHandler } from './handlers'
+import { noMatchHandler, navigationPlayOnlineHandler, navigationPlayOfflineHandler, navigationRulesHandler, runAppHandler, navigationBackHandler, navigationNextHandler, understandHandler, wordDoneHandler, resetWordHandler, readyHandler, currentScoreHandler, playgroundSizeHandler, setName1Handler, setName2Handler } from './handlers'
 import model from './intents.json'
 require('dotenv').config()
 
 const storage = new SaluteMemoryStorage()
 const intents = createIntents(model.intents)
-const { intent, match } = createMatchers<ScenarioRequest, typeof intents>()
+const { intent, text } = createMatchers<ScenarioRequest, typeof intents>()
 
 const userScenario = createUserScenario<ScenarioRequest>({
     NavigationPlayOffline: {
@@ -65,6 +65,17 @@ const userScenario = createUserScenario<ScenarioRequest>({
     PlaygroundSize: {
         match: intent('/Размер поля', {confidence: 0.7}),
         handle: playgroundSizeHandler
+    },
+    SetName1: {
+        match: req => (req.message.normalized_text.includes('имя NUM_TOKEN игрок')
+            || req.message.normalized_text.includes('имя'))
+        && !req.message.human_normalized_text.includes('имя 2 игрок'),
+        handle: setName1Handler
+    },
+    SetName2: {
+        match: req =>
+            req.message.normalized_text.includes('имя NUM_TOKEN игрок'),
+        handle: setName2Handler
     },
     // CurrentScore: {
     //     match: intent('/Текущий счет', {confidence: 0.7}),

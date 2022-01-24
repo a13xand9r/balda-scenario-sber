@@ -1,5 +1,6 @@
 import { ScenarioHandler, ActionType } from './types';
 import * as dictionary from './system.i18n'
+import { capitalizeFirstLetter } from './utils/utils';
 require('dotenv').config()
 
 export const runAppHandler: ScenarioHandler = ({ req, res }) => {
@@ -72,5 +73,21 @@ export const playgroundSizeHandler: ScenarioHandler = async ({ req, res }) => {
     res.appendCommand({
         type: 'SET_PLAYGROUND_SIZE',
         size
+    })
+}
+export const setName1Handler: ScenarioHandler = async ({ req, res }) => {
+    const name = capitalizeFirstLetter(req.message.normalized_text.includes('имя NUM_TOKEN игрок')
+        ? req.message.human_normalized_text.replace('имя 1 игрок', '').trim()
+        : req.message.human_normalized_text.replace('имя', '').trim())
+    res.appendCommand({
+        type: 'SET_NAME_1',
+        name
+    })
+}
+export const setName2Handler: ScenarioHandler = async ({ req, res }) => {
+    const name = capitalizeFirstLetter(req.message.human_normalized_text.replace('имя 2 игрок', '').trim())
+    res.appendCommand({
+        type: 'SET_NAME_2',
+        name
     })
 }
