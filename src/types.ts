@@ -27,11 +27,7 @@ export interface ScenarioAppState extends AppState {
 }
 
 export interface ScenarioIntentsVariables extends SaluteRequestVariable {
-    product?: string;
-    number?: string;
-    ordinal?: string;
-    category?: string;
-    quantity?: string;
+    size?: string;
 }
 
 export interface ScenarioSession extends Record<string, unknown>{

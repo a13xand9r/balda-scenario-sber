@@ -67,3 +67,10 @@ export const currentScoreHandler: ScenarioHandler = async ({ req, res }) => {
     console.log('state', req.state)
     res.setPronounceText(`Текущий счёт: ${req.state?.player1?.name}, ${req.state?.player1?.score}.${req.state?.player2?.name}, ${req.state?.player2?.score}`)
 }
+export const playgroundSizeHandler: ScenarioHandler = async ({ req, res }) => {
+    const size = Number(JSON.parse(req.variables.size as string).size)
+    res.appendCommand({
+        type: 'SET_PLAYGROUND_SIZE',
+        size
+    })
+}

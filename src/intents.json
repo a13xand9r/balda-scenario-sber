@@ -162,7 +162,51 @@
         }
       ],
       "variables": {}
+    },
+    "/Размер поля": {
+      "matchers": [
+        {
+          "type": "phrase",
+          "rule": "@PlayGround"
+        }
+      ],
+      "variables": {
+        "size": {
+          "required": true,
+          "questions": []
+        }
+      }
     }
   },
-  "entities": {}
+  "entities": {
+    "PlayGround": {
+      "noMorph": false,
+      "matchers": [
+        {
+          "type": "synonyms",
+          "rule": [
+            "пять на пять",
+            "5 на 5"
+          ],
+          "value": "{\"size\": \"5\"}"
+        },
+        {
+          "type": "synonyms",
+          "rule": [
+            "четыре на четыре",
+            "4 на 4"
+          ],
+          "value": "{\"size\": \"4\"}"
+        },
+        {
+          "type": "synonyms",
+          "rule": [
+            "шесть на шесть",
+            "6 на 6"
+          ],
+          "value": "{\"size\": \"6\"}"
+        }
+      ]
+    }
+  }
 }
