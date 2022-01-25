@@ -12,7 +12,7 @@ import {
     NLPResponse
 } from '@salutejs/scenario'
 import { SaluteMemoryStorage } from '@salutejs/storage-adapter-memory'
-import { noMatchHandler, navigationPlayOnlineHandler, navigationPlayOfflineHandler, navigationRulesHandler, runAppHandler, navigationBackHandler, navigationNextHandler, understandHandler, wordDoneHandler, resetWordHandler, readyHandler, currentScoreHandler, playgroundSizeHandler, setName1Handler, setName2Handler, startAppHandler } from './handlers'
+import { noMatchHandler, navigationPlayOnlineHandler, navigationPlayOfflineHandler, navigationRulesHandler, runAppHandler, navigationBackHandler, navigationNextHandler, understandHandler, wordDoneHandler, resetWordHandler, readyHandler, currentScoreHandler, playgroundSizeHandler, setName1Handler, setName2Handler, startAppHandler, onlineGameFinishHandler } from './handlers'
 import model from './intents.json'
 require('dotenv').config()
 
@@ -21,9 +21,13 @@ const intents = createIntents(model.intents)
 const { intent, action } = createMatchers<ScenarioRequest, typeof intents>()
 
 const userScenario = createUserScenario<ScenarioRequest>({
-    StartApp: {
-        match: action('START_APP'),
-        handle: startAppHandler
+    // StartApp: {
+    //     match: action('START_APP'),
+    //     handle: startAppHandler
+    // },
+    OnlineGameFinish: {
+        match: action('ONLINE_GAME_FINISH'),
+        handle: onlineGameFinishHandler
     },
     NavigationPlayOffline: {
         match: intent('/Играть вдвоем', {confidence: 0.7}),
@@ -70,20 +74,20 @@ const userScenario = createUserScenario<ScenarioRequest>({
         handle: playgroundSizeHandler
     },
     SetName1: {
-        match: req => (req.message.normalized_text.includes('имя NUM_TOKEN игрок')
-            || req.message.normalized_text.includes('имя'))
-        && !req.message.human_normalized_text.includes('имя 2 игрок'),
+        match: req => (req.message?.normalized_text.includes('имя NUM_TOKEN игрок')
+            || req.message?.normalized_text.includes('имя'))
+        && !req.message?.human_normalized_text.includes('имя 2 игрок'),
         handle: setName1Handler
     },
     SetName2: {
         match: req =>
-            req.message.normalized_text.includes('имя NUM_TOKEN игрок'),
+            req.message?.normalized_text.includes('имя NUM_TOKEN игрок'),
         handle: setName2Handler
     },
-    // CurrentScore: {
-    //     match: intent('/Текущий счет', {confidence: 0.7}),
-    //     handle: currentScoreHandler
-    // },
+    CurrentScore: {
+        match: intent('/Текущий счет', {confidence: 0.7}),
+        handle: currentScoreHandler
+    },
 })
 
 const systemScenario = createSystemScenario({

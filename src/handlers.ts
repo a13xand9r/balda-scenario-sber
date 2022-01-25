@@ -1,3 +1,4 @@
+import { getUserScore, IncrementScoreArguments, incrementUserScore } from './dataBase';
 import { ScenarioHandler, ActionType } from './types';
 import * as dictionary from './system.i18n'
 import { capitalizeFirstLetter } from './utils/utils';
@@ -18,12 +19,27 @@ export const noMatchHandler: ScenarioHandler = async ({ req, res }) => {
 }
 
 export const startAppHandler: ScenarioHandler = async ({ req, res }) => {
+    const userScore = await getUserScore(req.request.uuid.sub)
+    console.log(userScore)
     if (req.request.uuid.sub){
         res.appendCommand({
             type: 'SET_USER_ID',
             userId: req.request.uuid.sub
         })
     }
+}
+export const onlineGameFinishHandler: ScenarioHandler = async ({ req, res }) => {
+    const payload = req.serverAction?.payload as IncrementScoreArguments
+    console.log(payload)
+    const userScore = await incrementUserScore({...payload, userId: req.request.uuid.sub})
+    console.log(userScore)
+    // console.log(userScore)
+    // if (req.request.uuid.sub){
+    //     res.appendCommand({
+    //         type: 'SET_USER_ID',
+    //         userId: req.request.uuid.sub
+    //     })
+    // }
 }
 
 export const navigationPlayOfflineHandler: ScenarioHandler = async ({ res }) => {
