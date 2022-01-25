@@ -33,8 +33,8 @@ export const getUserScore = async (userId: string): Promise<UserScore> => {
         }
         const user = await scoreDB.findOne({ userId })
         if (user) {
-            console.log('user', user)
-            return user
+            const {_id, ...userScore} = user
+            return userScore
         } else {
             return {...emptyScore, userId}
         }
@@ -79,7 +79,8 @@ export const incrementUserScore = async ({
                 opponents: [opponent]
             })
         }
-        return await scoreDB.findOne({ userId })
+        const {_id, ...newScore} = await scoreDB.findOne({ userId })
+        return newScore
     } catch (err) {
         console.log('mongoDB get score error: ', err)
         return {...emptyScore, userId}
@@ -108,3 +109,5 @@ export type UserScore = {
     score: number
     opponents: Opponent[]
 }
+
+export type UserScoreDB = UserScore & {_id: string}

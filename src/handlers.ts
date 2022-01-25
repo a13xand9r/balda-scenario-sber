@@ -19,6 +19,7 @@ export const noMatchHandler: ScenarioHandler = async ({ req, res }) => {
 }
 
 export const startAppHandler: ScenarioHandler = async ({ req, res }) => {
+    console.log('start app handler')
     const userScore = await getUserScore(req.request.uuid.sub)
     console.log(userScore)
     if (req.request.uuid.sub){
@@ -26,20 +27,23 @@ export const startAppHandler: ScenarioHandler = async ({ req, res }) => {
             type: 'SET_USER_ID',
             userId: req.request.uuid.sub
         })
+        const {userId, ...actionPayload} = userScore
+        res.appendCommand({
+            type: 'SET_USER_SCORE',
+            ...actionPayload
+        })
     }
 }
 export const onlineGameFinishHandler: ScenarioHandler = async ({ req, res }) => {
     const payload = req.serverAction?.payload as IncrementScoreArguments
-    console.log(payload)
-    const userScore = await incrementUserScore({...payload, userId: req.request.uuid.sub})
-    console.log(userScore)
-    // console.log(userScore)
-    // if (req.request.uuid.sub){
-    //     res.appendCommand({
-    //         type: 'SET_USER_ID',
-    //         userId: req.request.uuid.sub
-    //     })
-    // }
+    if (req.request.uuid.sub) {
+        const userScore = await incrementUserScore({ ...payload, userId: req.request.uuid.sub })
+        const { userId, ...actionPayload } = userScore
+        res.appendCommand({
+            type: 'SET_USER_SCORE',
+            ...actionPayload
+        })
+    }
 }
 
 export const navigationPlayOfflineHandler: ScenarioHandler = async ({ res }) => {

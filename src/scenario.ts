@@ -21,10 +21,10 @@ const intents = createIntents(model.intents)
 const { intent, action } = createMatchers<ScenarioRequest, typeof intents>()
 
 const userScenario = createUserScenario<ScenarioRequest>({
-    // StartApp: {
-    //     match: action('START_APP'),
-    //     handle: startAppHandler
-    // },
+    StartApp: {
+        match: action('START_APP'),
+        handle: startAppHandler
+    },
     OnlineGameFinish: {
         match: action('ONLINE_GAME_FINISH'),
         handle: onlineGameFinishHandler
