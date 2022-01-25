@@ -30,7 +30,7 @@ export const startAppHandler: ScenarioHandler = async ({ req, res }) => {
         const {userId, ...actionPayload} = userScore
         res.appendCommand({
             type: 'SET_USER_SCORE',
-            ...actionPayload
+            score: actionPayload
         })
     }
 }
@@ -41,7 +41,7 @@ export const onlineGameFinishHandler: ScenarioHandler = async ({ req, res }) => 
         const { userId, ...actionPayload } = userScore
         res.appendCommand({
             type: 'SET_USER_SCORE',
-            ...actionPayload
+            score: actionPayload
         })
     }
 }
