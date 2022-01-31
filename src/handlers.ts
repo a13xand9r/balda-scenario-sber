@@ -22,10 +22,6 @@ export const startAppHandler: ScenarioHandler = async ({ req, res }) => {
     console.log('start app handler')
     if (req.request.uuid.sub){
         const userScore = await getUserScore(req.request.uuid.sub)
-        // res.appendCommand({
-        //     type: 'SET_USER_ID',
-        //     userId: req.request.uuid.sub
-        // })
         const {userId, ...actionPayload} = userScore
         res.appendCommand({
             type: 'SET_USER_SCORE',
